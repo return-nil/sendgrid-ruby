@@ -59,62 +59,62 @@ jobs:
       - name: Run tests
         run: make test-docker
 
-  deploy:
-    name: Deploy
-    if: success() && github.ref_type == 'tag'
-    needs: [ test ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sendgrid-ruby
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+#  deploy:
+#    name: Deploy
+#    if: success() && github.ref_type == 'tag'
+#    needs: [ test ]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout sendgrid-ruby
+#        uses: actions/checkout@v2
+#        with:
+#          fetch-depth: 0
+#
+#      - name: Set up Ruby
+#        uses: ruby/setup-ruby@v1
+#        with:
+#          ruby-version: 3.1
+#          bundler-cache: true
+#
+#      - run: make install
+#
+#      - name: Create GitHub Release
+#        uses: sendgrid/dx-automator/actions/release@main
+#        with:
+#          footer: '**[RubyGems](https://rubygems.org/gems/sendgrid-ruby/versions/${version})**'
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: Publish to Rubygems
+#        env:
+#          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_AUTH_TOKEN }}
+#        run: |
+#          mkdir -p $HOME/.gem
+#          touch $HOME/.gem/credentials
+#          chmod 0600 $HOME/.gem/credentials
+#          printf -- "---\n:rubygems_api_key: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
+#          gem build *.gemspec
+#          gem push *.gem
+#
+#      - name: Submit metric to Datadog
+#        uses: sendgrid/dx-automator/actions/datadog-release-metric@main
+#        env:
+#          DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.1
-          bundler-cache: true
-
-      - run: make install
-
-      - name: Create GitHub Release
-        uses: sendgrid/dx-automator/actions/release@main
-        with:
-          footer: '**[RubyGems](https://rubygems.org/gems/sendgrid-ruby/versions/${version})**'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish to Rubygems
-        env:
-          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_AUTH_TOKEN }}
-        run: |
-          mkdir -p $HOME/.gem
-          touch $HOME/.gem/credentials
-          chmod 0600 $HOME/.gem/credentials
-          printf -- "---\n:rubygems_api_key: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
-          gem build *.gemspec
-          gem push *.gem
-
-      - name: Submit metric to Datadog
-        uses: sendgrid/dx-automator/actions/datadog-release-metric@main
-        env:
-          DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
-
-  notify-on-failure:
-    name: Slack notify on failure
-    if: failure() && github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
-    needs: [ test, deploy ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_COLOR: failure
-          SLACK_ICON_EMOJI: ':github:'
-          SLACK_MESSAGE: ${{ format('Test *{0}*, Deploy *{1}*, {2}/{3}/actions/runs/{4}', needs.test.result, needs.deploy.result, github.server_url, github.repository, github.run_id) }}
-          SLACK_TITLE: Action Failure - ${{ github.repository }}
-          SLACK_USERNAME: GitHub Actions
-          SLACK_MSG_AUTHOR: twilio-dx
-          SLACK_FOOTER: Posted automatically using GitHub Actions
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          MSG_MINIMAL: true
+#  notify-on-failure:
+#    name: Slack notify on failure
+#    if: failure() && github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
+#    needs: [ test, deploy ]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: rtCamp/action-slack-notify@v2
+#        env:
+#          SLACK_COLOR: failure
+#          SLACK_ICON_EMOJI: ':github:'
+#          SLACK_MESSAGE: ${{ format('Test *{0}*, Deploy *{1}*, {2}/{3}/actions/runs/{4}', needs.test.result, needs.deploy.result, github.server_url, github.repository, github.run_id) }}
+#          SLACK_TITLE: Action Failure - ${{ github.repository }}
+#          SLACK_USERNAME: GitHub Actions
+#          SLACK_MSG_AUTHOR: twilio-dx
+#          SLACK_FOOTER: Posted automatically using GitHub Actions
+#          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+#          MSG_MINIMAL: true
